@@ -10,10 +10,14 @@
  */
 ParallaxScroller = function() {
 	$(window).scroll($.proxy(function(event) { this.parallax(event); }, this));
+	this.viewport_height = $(window).height();
 };
 
 /** @var array All layers in the parallax */
 ParallaxScroller.prototype.layers = [];
+
+/** @var int Height of viewport in pixels */
+ParallaxScroller.prototype.viewport_height = 0;
 
 /**
  * Get Background Image Height
@@ -22,10 +26,10 @@ ParallaxScroller.prototype.layers = [];
  * @return int
  */
 ParallaxScroller.prototype.getBackgroundImageHeight = function(url) {
-	if(url.indexOf('url(') !== -1) url = url.replace(/url\("/, '').replace(/"\)/, '');
+	if(url.indexOf('url(') !== -1) url = url.replace(/url\(/, '').replace(/\)/, '');
+	if(url.indexOf('"') !== -1) url = url.replace(/"/g, '');
 	var img = $('<img />');
-	img.hide();
-	img.attr('src', url);
+	img.hide().attr('src', url);
 	$('body').append(img);
 	return $(img).height();
 };
@@ -49,9 +53,10 @@ ParallaxScroller.prototype.addLayer = function(layer_selector, speed, type, algo
 
 		//  Handle background segments
 		//  These will be parallaxed by offsetting background-position
-		//  NOTE: The x-value of th background position *must* be in pixels
+		//  NOTE: The x-value of the background position *must* be in pixels
 		if(type == 'background' && $($(layer_selector)[index]).css('background-image') != 'none') {
-			left = $($(layer_selector)[index])
+			//  Calculate starting left value for background image
+			var left = $($(layer_selector)[index])
 				.css('background-position')
 				.substr(
 						0,
@@ -61,6 +66,9 @@ ParallaxScroller.prototype.addLayer = function(layer_selector, speed, type, algo
 				);
 			if(left.indexOf('px') == -1) left = '0';
 			else left = left.replace('px', '');
+
+			//  Calculate starting top value for background image
+			var top = 0;
 			if(speed < 0 ) top = -1 * (this.getBackgroundImageHeight($($(layer_selector)[index]).css('background-image')) - $(window).height());
 			else top = $($(layer_selector)[index]).offset().top * speed * -1;
 
@@ -70,6 +78,7 @@ ParallaxScroller.prototype.addLayer = function(layer_selector, speed, type, algo
 				.css('height', $(window).height() + 'px');
 
 			segments[segments.length] = {
+					container: $(layer_selector)[index],
 					element: $(layer_selector)[index],
 					background_start: {left: left, top: top},
 					starting_offset: $($(layer_selector)[index]).offset(),
@@ -80,6 +89,7 @@ ParallaxScroller.prototype.addLayer = function(layer_selector, speed, type, algo
 		//  Handle element segments
 		if(type == 'element') {
 			segments[segments.length] = {
+					container: $(layer_selector)[index].parentNode,
 					element: $(layer_selector)[index],
 					element_start: $($(layer_selector)[index]).offset(),
 					starting_offset: $($(layer_selector)[index].parentNode).offset(),
@@ -113,33 +123,14 @@ ParallaxScroller.prototype.parallax = function(event) {
 
 		//  Loop through layer segments
 		for(j = 0; j < this.layers[i].segments.length; j++) {
-			vertical_offset = Math.floor((this.layers[i].segments[j].starting_offset.top - scroll_top) * this.layers[i].speed);
+//			if(!this.isInView(this.layers[i].segments[j])) continue;
 
-			//  Calculate Offset
-//			switch(this.layers[i].algorithm) {
-//				case 1:
-//					//  Algorithm 1
-//					//  Ensure that when scroll_top == starting_offset.top, the element is vertically centered within it's parent node
-//					vertical_offset = Math.floor((this.layers[i].segments[j].starting_offset.top - scroll_top) * this.layers[i].speed)
-//									+ $(this.layers[i].segments[j].element.parentNode).offset().top
-//									+ Math.floor($(this.layers[i].segments[j].element.parentNode).height() / 2)
-//									- Math.floor($(this.layers[i].segments[j].element).height() / 2);
-//					break;
-//				case 2:
-//					//  Algorithm 2
-//					//  Ensure that when scroll_top == starting_offset.top, the element is in it's original position
-//					vertical_offset = Math.floor((this.layers[i].segments[j].starting_offset.top - scroll_top) * this.layers[i].speed);
-//					break;
-//				case 3:
-//					//  Algorithm 3
-//					//  Ensure that when scroll_top == 0, the element is in it's original position
-//					vertical_offset = Math.floor((this.layers[i].segments[j].starting_offset.top - scroll_top) * this.layers[i].speed);
-//					break;
-//			}
+			vertical_offset = Math.floor((this.layers[i].segments[j].starting_offset.top - scroll_top) * this.layers[i].speed);
 
 			//  Set offset
 			switch(this.layers[i].segments[j].type) {
 				case 'background':
+					var top;
 					if(this.layers[i].speed < 0) top = this.layers[i].segments[j].background_start.top + vertical_offset;
 					else top = -1 * vertical_offset;
 
@@ -174,4 +165,17 @@ ParallaxScroller.prototype.parallax = function(event) {
 			}
 		}
 	}
+};
+
+/**
+ * Check if a segment is within the viewport
+ */
+ParallaxScroller.prototype.isInView = function(segment) {
+	return (
+			segment.starting_offset.top > $(window).scrollTop() &&
+			segment.starting_offset.top < ($(window).scrollTop() + this.viewport_height)
+		) || (
+			($(segment.container).height() + segment.starting_offset.top) > $(window).scrollTop() &&
+			($(segment.container).height() + segment.starting_offset.top) < ($(window).scrollTop() + this.viewport_height)
+		);
 };
