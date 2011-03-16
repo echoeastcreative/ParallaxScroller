@@ -135,7 +135,7 @@ ParallaxScroller.prototype.parallax = function(event) {
 					else top = segment.self_start.top - vertical_offset;
 					$(segment.element).offset({
 						top: top,
-						left: segment.starting_offset.left
+						left: segment.self_start.left
 					});
 					break;
 			}
