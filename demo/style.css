@@ -14,30 +14,43 @@ section h1 {
 	top: 225px;
 }
 
+section p {
+	background-color: rgba(128, 128, 128, 0.5);
+	padding: 16px;
+	position: relative;
+	top: 300px;
+	width: 50%;
+}
+
 /* Background Image from http://www.flickr.com/photos/shaireproductions/5514867857/ */
 section#s1 {
 	background-image: url("./5514867857_7ec3a57d94_o.jpg");
 }
+section#s1 p { left: 100px; }
 
 /* Background Image from http://www.flickr.com/photos/39095070@N02/5515373969/ */
 section#s2 {
 	background-image: url("./5515373969_7450fe4068_o.jpg");
 }
+section#s2 p { left: 200px; }
 
 /* Background Image from http://www.flickr.com/photos/shaireproductions/5515463050/ */
 section#s3 {
 	background-image: url("./5515463050_abc1dfa9a1_o.jpg");
 	color: #ddd;
 }
+section#s3 p { left: 300px; }
 
 /* Background Image from http://www.flickr.com/photos/see-through-the-eye-of-g/5521819728/ */
 section#s4 {
 	background-image: url("./5521819728_c0a4cfe9d2_o.jpg");
 	color: #ddd;
 }
+section#s4 p { left: 400px; }
 
 /* Background Image from http://www.flickr.com/photos/matthewjuran/5523217723/ */
 section#s5 {
 	background-image: url("./5523217723_b978d3c401_o.jpg");
 	color: #fdb;
 }
+section#s5 p { left: 500px; }
