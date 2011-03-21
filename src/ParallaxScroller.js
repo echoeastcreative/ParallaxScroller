@@ -2,7 +2,7 @@
  * Parallax Scroller
  * 
  * @uses jQuery 1.5
- * @author Doug Hurst <dalan.hurst@gmail.com>
+ * @author Doug Hurst <doug@echoeastcreative.com>
  */
 
 /**
